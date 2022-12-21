@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+{% set active_item = 'blog' %}
+{% block content %}
+
+
+<div class="container mt-3">
+
+    <div class="d-flex p-3 ">  
+    <div class="col">           
+    <img src="{{ blog.imageFile }}" class="rounded-circle"> 
+    </div>
+    <div class="col align-items-center"><h1>{{ blog.title }}</h1>
+    <div class="mt-5">
+    {% if current_user.is_authenticated %}
+    {% if current_user==blog.author  or admin %}
+    <form action="{{ url_for('deleteBlog',id=blog.id) }}" method="POST">
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+        {% if  not admin %}
+            <a href="{{ url_for('updateBlog',id=blog.id) }}">
+                <button type="button " class="btn btn-primary">Update</button>
+            </a>
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+</div>
+</div>
+
+</div>
+<p>{{ blog.content }} </p>
+</div>
+
+<div id="main">
+
+    <h1>Comments by the Users</h1>
+    
+    {% if current_user.is_authenticated and current_user.id != 0%}
+<input type="text" id="userComment" class="form-control" placeholder="your comment here">
+{% endif %}
+
+<br>
+{% for comment in allComments %}
+<div class="card" id="{{ comment.id }}">
+    <div class="card-header">
+        <h3>{{ comment.postedBy.userName }}</h3>
+</div>
+<div class="card-body">
+    <p class="font-weight-bold" id="{{ comment.id }}content">{{ comment.content }}</p>
+    <hr />
+  <small>{{ comment.datePosted }}</small>
+  {% if current_user.is_authenticated %}
+  {% if current_user==comment.postedBy or admin %}
+  <button type="button" onclick="deleteComment('{{ comment.id }}')" class="deleteButton btn btn-outline-danger btn-sm float-right">
+    delete
+</button>
+{% if not admin %}
+<button type="button" onclick="updateComment('{{ comment.id }}')" id="{{ comment.id }}update" class="updateButton btn btn-outline-info btn-sm float-right">
+    update
+</button>
+{% endif %} {% endif %} {% endif %}
+</div>
+</div>
+&nbsp;
+{% endfor %}
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<script>
+
+    $(document).ready(function() {
+        $("#userComment").keydown(function(e) {
+            if (e.keyCode == 13 && $('#userComment').val()) {
+                $.getJSON("/addComment/{{blog.id}}", {
+                    comment: $('#userComment').val()
+                    },
+                    function(object) {
+                        addComment(object.data)
+                });
+                return false;
+            }   
+        });
+    });
+
+
+    function addComment(newComment) {
+            const card = document.createElement("div")
+            const cardHeader = document.createElement("div")
+            const name = document.createElement("h3")
+            const cardBody = document.createElement("div")
+            const para = document.createElement("p")
+            const lineBreak = document.createElement("hr")
+            const small = document.createElement("small")
+            const deleteButton = document.createElement('button')
+            const updateButton = document.createElement('button')
+
+            card.id = newComment.id
+            card.classList.add('card')
+            cardHeader.classList.add('card-header')
+            cardBody.classList.add('card-body')
+            para.classList.add('font-weight-bold')
+            para.id = newComment.id+'content'
+            deleteButton.classList.add('deleteButton')
+            deleteButton.classList.add('float-right')
+            deleteButton.classList.add('btn')
+            deleteButton.classList.add('btn-outline-danger')
+            deleteButton.classList.add('btn-sm')
+            updateButton.classList.add('updateButton')
+            updateButton.classList.add('float-right')
+            updateButton.classList.add('btn')
+            updateButton.classList.add('btn-outline-info')
+            updateButton.classList.add('btn-sm')
+
+            name.innerHTML = '{{ current_user.userName }}'
+            para.innerHTML = newComment.content
+            small.innerHTML = newComment.datePosted
+            deleteButton.innerHTML = 'delete'
+            updateButton.innerHTML = 'update'
+
+
+            deleteButton.onclick = function(){ deleteComment(newComment.id); }
+            updateButton.onclick = function(){ updateComment(newComment.id); }
+
+            cardBody.appendChild(para)
+            cardBody.appendChild(lineBreak)
+            cardBody.appendChild(small)
+            cardBody.appendChild(deleteButton)
+            cardBody.appendChild(updateButton)
+            cardHeader.appendChild(name)
+            card.appendChild(cardHeader)
+            card.appendChild(cardBody)
+
+            document.getElementById('userComment').value="";
+
+            var element = document.getElementById("main");
+            element.appendChild(card);
+        }
+
+        
+        function deleteComment(commentId){
+            $.post('/deleteComment/'+commentId);
+            $('#' + commentId).remove();
+        }
+
+        function updateComment(commentId){
+            var text = document.getElementById(commentId+'content').innerHTML
+            var oldElement = document.getElementById(commentId+'content')
+            var newElement = ' <input type="text" id="'+commentId+'content" class="form-control" value="'+text+'">'
+            oldElement.outerHTML = newElement
+            var button =  document.getElementById(commentId+'update')
+            var newButton = '<button type="button" onclick="doneReview('+commentId+')" id="'+commentId+'done" class="updateButton btn btn-outline-info btn-sm float-right">done</button>'
+            button.outerHTML = newButton
+        }
+
+        function doneReview(commentId){
+            var text = $('#'+commentId+'content').val()
+            var element= document.getElementById(commentId+'content')
+            $.getJSON("/updateComment/"+commentId, {
+                updatedComment:  text
+            },function(object){
+                var newElement =  '<p class="font-weight-bold" id="'+object.data.id+'content">'+object.data.content+'<p>'
+                element.outerHTML = newElement
+                var button =  document.getElementById(commentId+'done')
+                var newButton = '<button type="button" onclick="updateReview('+commentId+')" id="'+commentId+'update" class="updateButton btn btn-outline-info btn-sm float-right">done</button>'
+                button.outerHTML = newButton
+            });
+        }
+
+</script>
+{% endblock content %}

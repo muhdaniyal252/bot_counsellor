@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+{% set active_item = 'register' %}
+{% block content %}
+
+<section>
+	
+        <h2>REGISTER</h2>
+        <form action="" method="POST">
+            {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.userName.label(for="usr") }}
+            {% if form.userName.errors %}
+                {{ form.userName(class="form-control  is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.userName.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.userName(class="form-control ") }}
+            {% endif %}
+        </div> 
+        
+
+        <div class="form-group">
+            {{ form.email.label(for="usr") }}
+            {% if form.email.errors %}
+                {{ form.email(class="form-control  is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.email.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.email(class="form-control ") }}
+            {% endif %}
+        </div> 
+
+        <div class="form-group">
+            {{ form.password.label(for="usr") }}
+            {% if form.password.errors %}
+                {{ form.password(class="form-control  is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.password.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.password(class="form-control ") }}
+            {% endif %}
+        </div> 
+
+        <div class="form-group">
+            {{ form.confirmPassword.label(for="usr") }}
+            {% if form.confirmPassword.errors %}
+                {{ form.confirmPassword(class="form-control  is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.confirmPassword.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.confirmPassword(class="form-control ") }}
+            {% endif %}
+        </div> 
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+</section>
+
+{% endblock content %}

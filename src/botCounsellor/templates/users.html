@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% set active_item = active_item %}
+{% block content %}
+
+{% for user in users %}
+{% if admin %} 
+<form action="{{ url_for('deleteUser', id=user.id) }}" method="POST">
+    <button type="submit" class="btn btn-danger float-right btn-sm">Delete</button>
+</form>
+{% endif %}
+<p>{{ user.userName }}</p>
+{% if user.userType == 'stu' %} <a href="{{ url_for('chatRoom',id=user.id) }}" ><input type="button" value="Visit Chatroom" class="btn btn-info float-right btn-sm"></a> {% endif %}
+<p>{{ user.email }}</p>
+<hr />
+{% endfor %}
+
+<script>
+
+</script>
+
+{% endblock %}

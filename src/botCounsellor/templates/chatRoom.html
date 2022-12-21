@@ -1,0 +1,70 @@
+{% extends "layout.html" %} 
+{% set active_item = 'chatRoom' %}
+{% block content %} 
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+<div class= "chatbox">
+
+    <div class ="chatlogs" id="chatlog">
+    
+    {% for message in messages %}
+        <div class = "chat {{ message.sender }}">
+            <div class = "user-photo"> </div>
+            <p class="chat-message"> {{ message.msg }}</p>
+        </div>
+    {% endfor %}
+    
+    </div>
+    {% if current_user.userType == 'stu' %}
+        <div class="form-group" >
+            &nbsp;
+            <input type="text" class="form-control" id="userMessage" >
+        </div>
+    {% endif %}
+
+</div>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+
+    $(document).ready(function(){
+        $('#userMessage').keydown(function(e){
+            if (e.keyCode == 13 && $('#userMessage').val()){
+                var input = $('#userMessage').val()
+                addMessage(input,"user")
+                $.getJSON('/chat',{
+                    message : input
+                },function(object){
+                    addMessage(object.data.msg,object.data.sender)
+                    document.getElementById('userMessage').value="";
+                    document.getElementById('chatlog').scrollBy(0,400)
+                })
+            }
+        });
+    });
+
+    function addMessage(message,sender){
+
+        const mainDiv = document.createElement('div')
+        mainDiv.classList.add('chat')
+        mainDiv.classList.add(sender)
+
+        const subDiv = document.createElement('div')
+        subDiv.classList.add('user-photo')
+
+        const msg = document.createElement('p')
+        msg.classList.add('chat-message')
+        msg.innerHTML = message
+        
+        mainDiv.appendChild(subDiv)
+        mainDiv.appendChild(msg)
+
+        var element = document.getElementById('chatlog')
+        element.appendChild(mainDiv)
+    }
+
+</script>
+
+
+{% endblock content %}

@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+{% set active_item = 'reviews' %} {% block content %}
+
+
+<div id="main">
+<h1>Reviews by the Users</h1>
+    
+    {% if current_user.is_authenticated and current_user.userType == 'stu' %}
+            <input type="text" id="userReview" class="form-control" placeholder="your review here">
+    {% endif %}
+    <br>
+    {% for review in allReviews %}
+  <div class="card" id="{{ review.id }}">
+    <div class="card-header">
+      <h3>{{ review.givenBy.userName }}</h3>
+    </div>
+    <div class="card-body">
+      <p class="font-weight-bold" id="{{ review.id }}content">{{ review.content }}</p>
+      <hr />
+      <small>{{ review.datePosted }}</small>
+      {% if current_user.is_authenticated %}
+      {% if current_user==review.givenBy or admin %}
+      <button type="button" onclick="deleteReview('{{ review.id }}')" class="deleteButton btn btn-outline-danger btn-sm float-right">
+        delete
+    </button>
+    {% if not admin %}
+    <button type="button" onclick="updateReview('{{ review.id }}')" id="{{ review.id }}update" class="updateButton btn btn-outline-info btn-sm float-right">
+        update
+    </button>
+    {% endif %} {% endif %} {% endif %}
+    </div>
+  </div>
+  &nbsp;
+  {% endfor %}
+</div>
+
+
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+        $(document).ready(function() {
+            $("#userReview").keydown(function(e) {
+                if (e.keyCode == 13 && $('#userReview').val()) {
+                    $.getJSON("/addReview", {
+                        review: $('#userReview').val()
+                        },
+                        function(object) {
+                            addReview(object.data)
+                    });
+                    return false;
+                }   
+            });
+        });
+
+
+
+        function addReview(newReview) {
+            const card = document.createElement("div")
+            const cardHeader = document.createElement("div")
+            const name = document.createElement("h3")
+            const cardBody = document.createElement("div")
+            const para = document.createElement("p")
+            const lineBreak = document.createElement("hr")
+            const small = document.createElement("small")
+            const deleteButton = document.createElement('button')
+            const updateButton = document.createElement('button')
+
+            card.id = newReview.id
+            card.classList.add('card')
+            cardHeader.classList.add('card-header')
+            cardBody.classList.add('card-body')
+            para.classList.add('font-weight-bold')
+            para.id = newReview.id+'content'
+            deleteButton.classList.add('deleteButton')
+            deleteButton.classList.add('float-right')
+            deleteButton.classList.add('btn')
+            deleteButton.classList.add('btn-outline-danger')
+            deleteButton.classList.add('btn-sm')
+            updateButton.classList.add('updateButton')
+            updateButton.classList.add('float-right')
+            updateButton.classList.add('btn')
+            updateButton.classList.add('btn-outline-info')
+            updateButton.classList.add('btn-sm')
+
+            name.innerHTML = '{{ current_user.userName }}'
+            para.innerHTML = newReview.content
+            small.innerHTML = newReview.datePosted
+            deleteButton.innerHTML = 'delete'
+            updateButton.innerHTML = 'update'
+
+
+            deleteButton.onclick = function(){ deleteReview(newReview.id); }
+            updateButton.onclick = function(){ updateReview(newReview.id); }
+
+            cardBody.appendChild(para)
+            cardBody.appendChild(lineBreak)
+            cardBody.appendChild(small)
+            cardBody.appendChild(deleteButton)
+            cardBody.appendChild(updateButton)
+            cardHeader.appendChild(name)
+            card.appendChild(cardHeader)
+            card.appendChild(cardBody)
+
+            document.getElementById('userReview').value="";
+
+            var element = document.getElementById("main");
+            element.appendChild(card);
+        }
+
+        function deleteReview(reviewId){
+            $.post('/deleteReview/'+reviewId);
+            $('#' + reviewId).remove();
+        }
+
+        function doneReview(reviewId){
+            var text = $('#'+reviewId+'content').val()
+            var element= document.getElementById(reviewId+'content')
+            $.getJSON("/updateReview/"+reviewId, {
+                updatedRevew:  text
+            },function(object){
+                var newElement =  '<p class="font-weight-bold" id="'+object.data.id+'content">'+object.data.content+'<p>'
+                element.outerHTML = newElement
+                var button =  document.getElementById(reviewId+'done')
+                var newButton = '<button type="button" onclick="updateReview('+reviewId+')" id="'+reviewId+'update" class="updateButton btn btn-outline-info btn-sm float-right">done</button>'
+                button.outerHTML = newButton
+            });
+        }
+
+        function updateReview(reviewId){
+            var text = document.getElementById(reviewId+'content').innerHTML
+            var oldElement = document.getElementById(reviewId+'content')
+            var newElement = ' <input type="text" id="'+reviewId+'content" class="form-control" value="'+text+'">'
+            oldElement.outerHTML = newElement
+            var button =  document.getElementById(reviewId+'update')
+            var newButton = '<button type="button" onclick="doneReview('+reviewId+')" id="'+reviewId+'done" class="updateButton btn btn-outline-info btn-sm float-right">done</button>'
+            button.outerHTML = newButton
+        }
+
+</script>
+
+{% endblock content %}

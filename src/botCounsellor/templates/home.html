@@ -1,0 +1,11 @@
+{% extends "layout.html" %} 
+{% set active_item = 'home' %}
+{% block content %} 
+
+{% for blog in blogs %}
+        <ul class="list-group">
+            <li class="list-group-item "><a href="{{ url_for('blog',id=blog.id) }}">{{ blog.title }}</a></li><br>
+        </ul>
+{% endfor %}
+
+{% endblock content %}

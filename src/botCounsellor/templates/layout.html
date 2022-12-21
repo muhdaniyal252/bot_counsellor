@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <title>{{ title }}</title>
+  </head>
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark" >
+      <a class="navbar-brand" href="{{ url_for('home') }}">BOTCOUNSELLOR</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item {% if active_item == 'home' %}active{% endif %}">
+            <a class="nav-link" href="{{ url_for('home') }}">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item {% if active_item == 'reviews' %}active{% endif %}">
+            <a class="nav-link" href="{{ url_for('reviews') }}">Reviews <span class="sr-only">(current)</span></a>
+          </li>
+          {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('logout') }}">Logout <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item {% if active_item == 'account' %}active{% endif %}">
+              <a class="nav-link" href="{{ url_for('account') }}">Account<span class="sr-only">(current)</span></a>
+            </li>
+            {% if admin %}
+              <li class="nav-item {% if active_item == 'register' %}active{% endif %}">
+                <a class="nav-link" href="{{ url_for('register') }}">Register Counsellor<span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item {% if active_item == 'stu' %}active{% endif %}">
+                <a class="nav-link" href="{{ url_for('allUsers',userType='students') }}">Students<span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item {% if active_item == 'psy' %}active{% endif %}">
+                <a class="nav-link" href="{{ url_for('allUsers',userType='psychiatrists') }}">Counsellor<span class="sr-only">(current)</span></a>
+              </li>
+            {% elif current_user.userType == 'psy' %}
+              <li class="nav-item {% if active_item == 'addBlog' %}active{% endif %}">
+                <a class="nav-link" href="{{ url_for('addBlog') }}">Add Blog<span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item {% if active_item == 'chatRoom' %}active{% endif %}">
+                <a class="nav-link" href="{{ url_for('showStudents''') }}">Chat Room<span class="sr-only">(current)</span></a>
+              </li>
+              {% elif current_user.userType == 'stu' %}
+              <li class="nav-item {% if active_item == 'chatRoom' %}active{% endif %}">
+                <a class="nav-link" href="{{ url_for('chatRoom',id=current_user.id) }}">Chat Room<span class="sr-only">(current)</span></a>
+              </li>
+              {% endif %}
+            {% else %}
+            <li class="nav-item {% if active_item == 'register' %}active{% endif %}">
+              <a class="nav-link" href="{{ url_for('register') }}">Register<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item {% if active_item == 'login' %}active{% endif %}">
+              <a class="nav-link" href="{{ url_for('login') }}">Login<span class="sr-only">(current)</span></a>
+            </li>
+            {% endif %}
+          </ul>
+          
+        </div>
+      </header>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category,message in messages %}
+          <div class="alert alert-{{category}} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>        
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  
+    &nbsp
+    <div class="container">
+
+      
+      {% block content %} {% endblock %}
+      
+    </div>
+    
+  <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  </body>
+</html>
